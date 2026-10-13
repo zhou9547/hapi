@@ -62,7 +62,7 @@ class HubSession internal constructor(
     /** Normalized hub origin. */
     val hubUrl: String = this.baseUrl.toString().removeSuffix("/")
 
-    private val baseClient: OkHttpClient = OkHttpClient.Builder()
+    private val baseClient: OkHttpClient = hubHttpClientBuilder()
         .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         // Reads must outlive the hub's 30 s RPC-relay timeout so RPC-wrapped
         // endpoints fail with the hub's JSON envelope, not a client timeout.

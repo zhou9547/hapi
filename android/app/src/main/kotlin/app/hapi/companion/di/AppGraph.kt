@@ -21,6 +21,7 @@ import app.hapi.data.auth.CredentialStore
 import app.hapi.data.auth.EncryptedPrefsCredentialStore
 import app.hapi.data.auth.HubRegistry
 import app.hapi.data.auth.HubRegistryStorage
+import app.hapi.data.hubHttpClientBuilder
 import app.hapi.data.push.ApiPushDeviceGateway
 import app.hapi.data.push.DeviceRegistrar
 import app.hapi.data.push.PushActionRunner
@@ -153,7 +154,7 @@ class AppGraph(context: Context) {
      * Bare client for the two pre-pairing endpoints (`GET /health`,
      * `POST /api/auth`) — no interceptors: there are no credentials yet.
      */
-    private val pairingHttpClient: OkHttpClient = OkHttpClient.Builder()
+    private val pairingHttpClient: OkHttpClient = hubHttpClientBuilder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(20, TimeUnit.SECONDS)
         .build()

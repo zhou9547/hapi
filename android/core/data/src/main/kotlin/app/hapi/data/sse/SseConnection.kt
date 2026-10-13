@@ -1,5 +1,6 @@
 package app.hapi.data.sse
 
+import app.hapi.data.hubHttpClientBuilder
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.channels.awaitClose
@@ -116,7 +117,7 @@ fun buildEventsUrl(
  * `Accept-Encoding: identity` and takes the uncompressed stream.
  */
 class OkHttpSseTransport(
-    baseClient: OkHttpClient = OkHttpClient(),
+    baseClient: OkHttpClient = hubHttpClientBuilder().build(),
     private val acceptEncodingIdentity: Boolean = false,
 ) : SseTransport {
 

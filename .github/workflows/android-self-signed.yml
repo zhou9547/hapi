@@ -1,0 +1,54 @@
+name: Android Self-Signed HTTPS APK
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - main
+        paths:
+            - '.github/workflows/android-self-signed.yml'
+            - 'android/core/data/src/main/kotlin/app/hapi/data/HubHttpClient.kt'
+            - 'android/core/data/src/test/kotlin/app/hapi/data/HubHttpClientTest.kt'
+
+permissions:
+    contents: read
+
+concurrency:
+    group: android-self-signed-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: android
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: '21'
+            - uses: gradle/actions/setup-gradle@v4
+            - name: Test default HTTPS certificate validation
+              run: ./gradlew :core:data:testDebugUnitTest --tests app.hapi.data.HubHttpClientTest
+            - name: Test self-signed HTTPS support
+              run: ./gradlew :core:data:testDebugUnitTest --tests app.hapi.data.HubHttpClientTest -PhapiAllowUntrustedHttps=true
+            - name: Build and lint APK with self-signed HTTPS enabled
+              run: ./gradlew :app:assembleDebug :app:lintDebug -PhapiAllowUntrustedHttps=true
+            - name: Upload installable APK
+              uses: actions/upload-artifact@v4
+              with:
+                  name: hapi-android-self-signed-debug-${{ github.run_number }}
+                  path: android/app/build/outputs/apk/debug/app-debug.apk
+                  if-no-files-found: error
+                  retention-days: 14
+            - name: Upload test and lint reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: hapi-android-self-signed-reports-${{ github.run_number }}
+                  path: |
+                      android/core/data/build/reports/tests/
+                      android/app/build/reports/lint-results-debug.*
+                  if-no-files-found: ignore

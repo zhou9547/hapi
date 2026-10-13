@@ -124,6 +124,34 @@ Temporary authentication refresh failures (network/5xx) keep paired
 credentials. A rejected access token or a second 401 after a successful
 refresh requires re-pairing. See the [auth contract](../docs/api/client-contract/auth.md#silent-re-auth-401-handling).
 
+## Self-hosted hubs with untrusted HTTPS certificates
+
+For a private build that connects to a self-signed hub, explicitly enable
+the build property:
+
+```sh
+cd android
+./gradlew :app:assembleDebug -PhapiAllowUntrustedHttps=true
+```
+
+The APK is written to `app/build/outputs/apk/debug/app-debug.apk`. This option
+also applies to release builds and defaults to `false` when omitted. Pairing,
+REST, authentication refresh, images, SSE and background push actions use the
+same certificate policy. No user CA installation is required. Hub URLs must
+still use HTTPS and the certificate must match the requested hostname.
+
+Enabling this property bypasses certificate-chain and validity checks for
+hub connections. Use it only for private trusted environments; it weakens
+protection against impersonation. Existing certificates, including the
+`oneplusv6.lyc123.top` certificate, must still contain the matching SAN.
+
+Focused TLS regression tests:
+
+```sh
+./gradlew :core:data:testDebugUnitTest --tests app.hapi.data.HubHttpClientTest
+./gradlew :core:data:testDebugUnitTest --tests app.hapi.data.HubHttpClientTest -PhapiAllowUntrustedHttps=true
+```
+
 ## Firebase / push
 
 **Official Firebase builds:** pair an updated hub and allow

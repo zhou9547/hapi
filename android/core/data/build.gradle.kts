@@ -13,6 +13,19 @@ android {
 
     defaultConfig {
         minSdk = 26
+        buildConfigField(
+            "boolean",
+            "ALLOW_UNTRUSTED_HTTPS",
+            providers.gradleProperty("hapiAllowUntrustedHttps")
+                .map(String::toBooleanStrict)
+                .orElse(false)
+                .get()
+                .toString(),
+        )
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {
@@ -53,5 +66,6 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.okhttp.tls)
     testImplementation(libs.turbine)
 }
